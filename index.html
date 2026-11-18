@@ -1609,15 +1609,27 @@ function toggleTrain(){S.flags.train=S.flags.train===false?true:false;toast(S.fl
 function toggleFast(){FAST=!FAST;toast(FAST?'⏩ 빠르게 진행':'▶ 보통 속도');$('#fastBtn').classList.toggle('on',FAST)}
 
 /* ============ 저장 / 시작 ============ */
-function save(){if(S&&!S.ended)store.set('ggm3_save',S)}
+function save(){if(S&&!S.ended&&!(S.flags&&S.flags.preview))store.set('ggm3_save',S)}
 function title(){
  $('#tChar').innerHTML=girl(playerLook({expr:'happy',mic:false,crown:false}));
  const sv=store.get('ggm3_save');
  $('#tBtns').innerHTML=(sv?`<button class="tbtn pk" onclick="cont()">▶ 이어하기 <small style="font-size:12px">(${sv.name} · ${STAGES[sv.stage].name})</small></button>`:'')+
-  `<button class="tbtn ${sv?'':'pk'}" onclick="start()">▶ 새로 시작</button><button class="tbtn" onclick="openGallery()">▶ 엔딩 도감</button>`;
+  `<button class="tbtn ${sv?'':'pk'}" onclick="start()">▶ 새로 시작</button><button class="tbtn" onclick="openGallery()">▶ 엔딩 도감</button><button class="tbtn" onclick="previewDebut()" style="font-size:13px">✨ 데뷔 이후 미리보기 <small>(테스트용)</small></button>`;
  $('#title').classList.add('show');
 }
 function cont(){audio();S=store.get('ggm3_save');if(!S.wear.hair){S.wear.hair='h0';S.owned.push('h0')}S.skills=S.skills||[];S.badges=S.badges||[];S.mm=null;$('#title').classList.remove('show');render()}
+async function previewDebut(){
+ audio();SFX.ok();$('#title').classList.remove('show');
+ newGame('한유나');
+ Object.assign(S,{age:17,year:2030,month:2,stage:3,agency:'haeon',group:'VELVA',concept:'pure',position:'메인보컬',money:1500,
+  vocal:62,dance:58,visual:60,mind:50,body:50,diet:45,social:45,english:25,interview:30,variety:25,fame:0,
+  style:{pure:8,charisma:2,bright:3},flags:{preview:1}});
+ ['t20','t21','t22'].forEach(id=>S.owned.push(id));S.wear.top='t22';
+ render();busy=true;
+ await dialog({speaker:'미리보기',title:'✨ 데뷔 이후 미리보기',body:'원래는 연습생 시절을 몇 달 동안 거쳐야 데뷔해요.\n테스트용으로 바로 데뷔 장면부터 보여 줄게요.\n(이 플레이는 이어하기에 저장되지 않아요.)'});
+ await nextStage(4);
+ busy=false;render();
+}
 async function start(){
  audio();SFX.ok();
  $('#title').classList.remove('show');
