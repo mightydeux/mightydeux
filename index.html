@@ -764,6 +764,63 @@ body.onmap #pad{display:flex}
 .pkopt.free{background:#f6fbf7;border-color:#d8eadc}.pkopt.free b{color:#3f8a62}
 .pkopt.out{background:#faf7f7}.pkopt.out b{color:#9a8a8e}
 .bmn{padding:0 16px;color:var(--rose);font-weight:700}
+
+/* =====================================================================
+   PC 화면 (가로 960px 이상) — 같은 주소에서 자동 전환
+   왼쪽: 장면/마을 · 오른쪽: 목표·능력치·메뉴
+   ===================================================================== */
+@media (min-width:960px){
+ body{align-items:flex-start;background:radial-gradient(circle at 20% 0%,#fff,#f6e8ea 55%,#efe4f2)}
+ #app{max-width:1240px;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(380px,1fr);
+  grid-template-areas:"hdr hdr" "scene goal" "scene stats" "scene menu";grid-template-rows:auto auto auto 1fr;
+  gap:16px 22px;padding:22px 30px 26px;min-height:100vh;align-content:start;background:none}
+ #hdr{grid-area:hdr;padding:12px 22px}
+ #hdr .nm{font-size:22px}#hdr .dt{font-size:13px}#hdr .stg{font-size:13.5px}#hdr .gold{font-size:16px}
+ #scene{grid-area:scene;aspect-ratio:auto;height:calc(100vh - 118px);min-height:560px;max-height:860px}
+ #goal{grid-area:goal}#stats{grid-area:stats;gap:7px 18px}
+ #goal,#stats{padding:16px 20px}
+ .st{font-size:13.5px}
+ #menu{grid-area:menu;position:static;transform:none;width:auto;max-width:none;background:none;padding:0;align-self:start;z-index:auto}
+ #menu .mg{gap:10px}
+ #menu button{padding:12px 0 10px;font-size:13px}
+ #menu button.main{font-size:19px;padding:16px 0}
+ #menu button:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(160,100,110,.16)}
+ /* 마을 */
+ body.onmap #app{grid-template-areas:"hdr hdr" "map places" "map slot" "map pad";grid-template-rows:auto auto auto 1fr}
+ #mapwrap{grid-area:map;aspect-ratio:auto;height:calc(100vh - 118px);min-height:560px;max-height:860px}
+ #places{grid-area:places;gap:10px}
+ .place{padding:12px 14px}.place b{font-size:14.5px}.place small{font-size:11.5px}
+ .place:hover{border-color:#f5c6d3;transform:translateY(-2px);box-shadow:0 8px 18px rgba(160,100,110,.14)}
+ #slotbar{grid-area:slot}
+ #pad{grid-area:pad;position:static;transform:none;width:auto;max-width:none;background:none;padding:0;align-self:start;z-index:auto}
+ #pad button{padding:12px 0}
+ .tav{width:76px;height:76px}.tnpc b{font-size:12px;max-width:110px}
+ .tgift{width:56px;height:56px;font-size:32px}
+ .ttop span{font-size:16px}.ttop small{font-size:12.5px}
+ /* 창들: 아래에서 올라오는 시트 → 가운데 창 */
+ #sheetOv{align-items:center}
+ .sheet{max-width:640px;border-radius:28px;max-height:86vh;padding:20px 22px 22px}
+ #bmenu{top:50%;bottom:auto;transform:translate(-50%,-50%);max-width:560px;border-radius:28px;max-height:84vh;animation:none}
+ .bmart{height:170px;border-radius:28px 28px 0 0}
+ .dbox{max-width:540px}
+ .pkopt:hover,.dbtns button:hover,#vnCh button:hover{transform:translateX(3px)}
+ /* 대화 */
+ .vnw{max-width:860px}
+ #vnPort{width:34%;max-width:300px;bottom:230px}
+ #vnBox{min-height:190px;padding:30px 26px 30px}
+ #vnText,#vnCh button{font-size:17px}
+ /* 컷신 */
+ .ct,.ccap{max-width:480px}
+ /* 옷장: 왼쪽 거울, 오른쪽 옷 목록 */
+ .dwrap{max-width:1000px;height:auto;max-height:92vh;margin:4vh 0;border-radius:28px;display:grid;grid-template-columns:1fr 1.1fr;
+  grid-template-areas:"head head" "stage tabs" "stage list" "stage btn";grid-template-rows:auto auto 1fr auto;gap:10px 18px;padding:18px 22px}
+ #dress{align-items:flex-start}
+ .dhead{grid-area:head}.dstage{grid-area:stage;height:auto;min-height:520px}.dtabs{grid-area:tabs;margin:0}.dlist{grid-area:list;min-height:0}.dwrap .big{grid-area:btn;margin:0}
+ .dgrid{grid-template-columns:repeat(4,1fr)}
+ /* 타이틀 */
+ #tChar{height:420px!important}
+ .logo{font-size:52px}
+}
 </style>
 </head>
 <body>
@@ -779,7 +836,6 @@ body.onmap #pad{display:flex}
   <div id="slotbar"></div>
   <div id="goal" class="pk"></div>
   <div id="stats" class="pk"></div>
-</div>
 <div id="menu"><div class="mg">
   <button class="main" onclick="openMap()"><span>🗺️</span>외출해서 스케줄 정하기</button>
   <button onclick="openWardrobe()"><span>👗</span>옷장</button>
@@ -794,6 +850,7 @@ body.onmap #pad{display:flex}
   <button onclick="openList()"><span>📋</span>일정 목록</button>
   <button onclick="openStatus('me')"><span>💗</span>내 상태</button>
   <button class="home" onclick="closeMap();render()"><span>🏠</span>숙소로 돌아가기</button>
+</div>
 </div>
 <div id="bmenu"></div>
 <div class="ov" id="sheetOv"><div class="sheet" id="sheet"></div></div>
