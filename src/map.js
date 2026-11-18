@@ -64,24 +64,88 @@ function missionDone(){
  if(m.k==='calm') return S.stress<=50;
  if(m.k==='talk') return S.mm.talked.length>=2;
 }
-function townHTML(){
- const t=TH(),mm=S.mm;
- const day=S.stage>=4?`데뷔 D+${S.day-(S.debutDay||S.day)+1}`:`연습생 D+${S.day}`;
- return `<div class="tbg" style="background-image:url('${ARTBG[t.bg]}')"></div><div class="tshade ${t.tint}"></div>
- <div class="ttop"><span>📍 ${t.name}</span><small>${S.month}월 · ${day}</small></div>
- ${mm.items.map((it,i)=>it.got?'':`<button class="tgift" style="left:${it.x}%;top:${it.y}%" onclick="tapGift(${i})" aria-label="선물 상자">🎁</button>`).join('')}
- ${mm.npcs.map((n,i)=>`<button class="tnpc ${n.story&&!S.done[n.story]?'story':''} ${n.talked?'done':''}" style="left:${n.x}%;top:${n.y}%" onclick="tapNpc(${i})"><span class="tav">${portrait(n.k)}</span><b>${CAST[n.k].name}</b>${n.story&&!S.done[n.story]?'<i class="tbang">!</i>':n.talked?'':'<i class="ttalk">💬</i>'}</button>`).join('')}
- ${mm.fans&&!mm.cheered?`<button class="tfans" onclick="tapFans()">💖 팬 ${mm.fans}명이 기다리고 있어요 · 인사하기</button>`:''}`;
+/* ===== 걷는 거리 (옆에서 본 모습) =====
+   좌표 단위 u = 마을 화면 높이의 1/100. 건물·사람 위치는 모두 u로 정해 두고, 화면 크기가 바뀌면 u만 다시 잰다. */
+const STREET=['F','A','B','C','D','E','G'];                 // 왼쪽부터 늘어선 순서 (집에서 출발)
+const BH={A:50,B:53,C:55,D:60,E:46,F:52,G:74};               // 건물 높이 (u)
+const BASP={A:700/548,B:700/683,C:700/745,D:700/761,E:700/497,F:700/675,G:700/978}; // 그림 가로/세로 비율
+const SIGN={A:[6,50],B:[6,50],C:[47,50],D:[61,50],E:[6,50],F:[57,27],G:[30,50]};   // 간판 위치 (위에서 %, 왼쪽에서 %)
+const WALK_SPEED=40;
+function streetLayout(){
+ let x=12;const B={};
+ for(const id of STREET){const h=BH[id],w=h*BASP[id];B[id]={x,w,h,cx:x+w/2};x+=w+8}
+ MAP.B=B;MAP.len=x+4;
+ const lo=B.F.cx+8,hi=B.G.cx-6,doors=STREET.map(id=>B[id].cx);
+ const place=f=>{let wx=lo+(hi-lo)*f;for(const d of doors)if(Math.abs(wx-d)<6)wx=d+(wx<d?-7:7);return wx};
+ S.mm.npcs.forEach(n=>{n.wx=place(n.x/100)});
+ S.mm.items.forEach((it,i)=>{it.wx=place(((it.x/100)+i*.17)%1)});
 }
+function sdNpc(k){return ART.sd.npc[k]}
+function streetHTML(){
+ const t=TH(),st=S.stage;
+ const blds=STREET.map(id=>{const b=MAP.B[id],lock=id==='G'&&st<4;
+  return `<div class="mb ${lock?'lock':''} ${id==='G'&&!lock?'open':''}" data-b="${id}" style="left:calc(var(--u)*${b.x});width:calc(var(--u)*${b.w});height:calc(var(--u)*${b.h})"><img src="img/bd_${id}.webp" alt="" draggable="false"><span class="msign" style="top:${SIGN[id][0]}%;left:${SIGN[id][1]}%">${lock?'M 방송국 (공사 중)':BLABEL[id](st)}</span>${S.mm.hot.includes(id)&&!lock?'<span class="mhot">⭐ 핫스팟</span>':''}</div>`}).join('');
+ return `<div class="msky ${t.tint}"></div><div class="mworld" id="mworld"><div class="mground" style="width:calc(var(--u)*${MAP.len})"></div>${blds}<div id="mdyn"></div><div class="mme" id="mme"><img id="mmeimg" alt="" draggable="false"></div></div>
+ <div class="ttop"><span>📍 ${t.name}</span><small>${S.month}월 · ${S.stage>=4?`데뷔 D+${S.day-(S.debutDay||S.day)+1}`:`연습생 D+${S.day}`}</small></div>
+ <div class="mhint" id="mhint"></div><div class="mkeys">← → 걷기 · ↑ / 스페이스 들어가기·말 걸기</div>`;
+}
+function dynHTML(){
+ const mm=S.mm,G=MAP.B.G;
+ return mm.items.map((it,i)=>it.got?'':`<div class="mgift" data-g="${i}" style="left:calc(var(--u)*${it.wx})">🎁</div>`).join('')+
+  mm.npcs.map((n,i)=>{const sd=sdNpc(n.k),story=n.story&&!S.done[n.story];
+   return `<div class="mnpc ${sd?'sd':'card'} ${story?'story':''} ${n.talked?'done':''}" data-n="${i}" style="left:calc(var(--u)*${n.wx})">${story?'<i class="tbang">!</i>':n.talked?'':'<i class="ttalk">💬</i>'}${sd?`<img src="${sd}" alt="" draggable="false">`:`<span class="tav">${portrait(n.k)}</span>`}<b>${CAST[n.k].name}</b></div>`}).join('')+
+  (mm.fans&&!mm.cheered?`<div class="mfans" style="left:calc(var(--u)*${G.cx})">${'🙋‍♀️'.repeat(Math.min(5,1+Math.floor(mm.fans/6)))}<b>💖 팬 ${mm.fans}명</b></div>`:'');
+}
+function townHTML(){return streetHTML()}
 function placesHTML(){
  const st=S.stage,hot=S.mm.hot;
  return bldIds().map(id=>{const lock=id==='G'&&st<4;const n=S.slots.filter(a=>a&&bldOf(a)===id).length;
   return `<button class="place ${hot.includes(id)?'hot':''} ${lock?'lock':''}" onclick="enterBuilding('${id}')"><span class="pic">${BICON[id]}</span><b>${lock?'방송국 (공사 중)':BLABEL[id](st)}</b><small>${lock?'데뷔 후 오픈':hot.includes(id)?'⭐ 핫스팟 · 효과 1.5배':n?`📌 ${n}개 선택됨`:id==='F'?'옷장 · 저장':'일정 보기'}</small></button>`}).join('');
 }
-function redrawTown(){if(!MAP||!MAP.on)return;$('#town').innerHTML=townHTML();$('#places').innerHTML=placesHTML()}
-function tapGift(i){if(!MAP||MAP.busy)return;const it=S.mm.items[i];if(!it||it.got)return;it.got=true;S.mm.picked++;pickupItem();redrawTown()}
-function tapNpc(i){if(!MAP||MAP.busy)return;const n=S.mm.npcs[i];if(n)talkNPC(n)}
-function tapFans(){if(!MAP||MAP.busy||S.mm.cheered)return;S.mm.cheered=true;SFX.fan();const g=Math.round(4+S.fame/120);apply({fame:g,stress:-5});burst($('#mapwrap'),['💖','✨','🎀'],16);floatText(`꺄아~! ${S.name}!!`,'#ff7eb6',$('#mapwrap'));toast(`💖 팬들이 환호했다! 팬덤 +${g} · 스트레스 -5`);render();redrawTown()}
+function redrawTown(){if(!MAP||!MAP.on)return;const d=$('#mdyn');if(d)d.innerHTML=dynHTML();$('#places').innerHTML=placesHTML();MAP.nearKey=null}
+function tapFans(){if(!MAP||S.mm.cheered)return;S.mm.cheered=true;SFX.fan();const g=Math.round(4+S.fame/120);apply({fame:g,stress:-5});burst($('#mapwrap'),['💖','✨','🎀'],16);floatText(`꺄아~! ${S.name}!!`,'#ff7eb6',$('#mapwrap'));toast(`💖 팬들이 환호했다! 팬덤 +${g} · 스트레스 -5`);render();redrawTown()}
+function walkTo(x,act){if(!MAP||MAP.busy)return;MAP.goal={x:clamp(x,4,MAP.len-4),act}}
+function nearInfo(){
+ const px=MAP.px;
+ let n=null,bd=7;for(const q of S.mm.npcs){const d=Math.abs(q.wx-px);if(d<bd){bd=d;n=q}}
+ if(n) return {k:'n:'+n.k,n,txt:`💬 ${CAST[n.k].name}에게 말 걸기`};
+ for(const id of STREET){const b=MAP.B[id];if(Math.abs(b.cx-px)<Math.min(9,b.w*.32))return {k:'b:'+id,id,txt:id==='G'&&S.stage<4?'🚧 공사 중인 방송국':`🚪 ${BLABEL[id](S.stage)} 들어가기`}}
+ return null;
+}
+function mapAct(){
+ if(!MAP||!MAP.on||MAP.busy||$('#bmenu').classList.contains('show'))return;
+ const nr=nearInfo();if(!nr){floatText('가까이 가 보자!','#fff',$('#mapwrap'));return}
+ if(nr.n){MAP.face=nr.n.wx>MAP.px?1:-1;talkNPC(nr.n)}else enterBuilding(nr.id);
+}
+function mapLoop(t){
+ if(!MAP||!MAP.on)return;
+ const dt=Math.min(.05,(t-(MAP.t||t))/1000);MAP.t=t;
+ let dir=0;const frozen=MAP.busy||$('#bmenu').classList.contains('show')||$('#vn').classList.contains('show');
+ if(!frozen){if(MAP.held)MAP.goal=null;if(MAP.goal){const d=MAP.goal.x-MAP.px;if(Math.abs(d)<1){const g=MAP.goal;MAP.goal=null;if(g.act)g.act()}else dir=Math.sign(d)}else dir=MAP.held||0}
+ if(dir){MAP.px=clamp(MAP.px+dir*WALK_SPEED*dt,4,MAP.len-4);MAP.face=dir;MAP.wt+=dt}else MAP.wt=0;
+ // 선물 상자 · 팬
+ if(!frozen){const it=S.mm.items.find(i=>!i.got&&Math.abs(i.wx-MAP.px)<2.5);if(it){it.got=true;S.mm.picked++;redrawTown();pickupItem()}
+  else if(S.mm.fans&&!S.mm.cheered&&Math.abs(MAP.B.G.cx-MAP.px)<16)tapFans()}
+ // 그리기
+ const u=MAP.u,W=MAP.W,cam=clamp(MAP.px*u-W/2,0,Math.max(0,MAP.len*u-W));
+ MAP.world.style.transform=`translateX(${-cam}px)`;MAP.sky.style.backgroundPosition=`${-cam*.18}px 0`;
+ const fr=ART.sd.me[MAP.outfit];const fi=dir&&fr.length>1?Math.floor(MAP.wt/.17)%fr.length:0;
+ if(MAP.img.dataset.src!==fr[fi]){MAP.img.src=fr[fi];MAP.img.dataset.src=fr[fi]}
+ MAP.me.style.left=`${MAP.px*u}px`;MAP.me.classList.toggle('walk',!!dir);MAP.me.classList.toggle('left',MAP.face<0);
+ const nr=frozen?null:nearInfo();const key=nr?nr.k:'';
+ if(MAP.nearKey!==key){MAP.nearKey=key;const h=$('#mhint');h.innerHTML=nr?`<b>${nr.txt}</b><small>${matchMedia('(pointer:fine)').matches?'↑ / 스페이스':'A 버튼'}</small>`:'';h.classList.toggle('on',!!nr);const pa=$('#pa');if(pa)pa.classList.toggle('glow',!!nr);
+  document.querySelectorAll('.mb.near,.mnpc.near').forEach(e=>e.classList.remove('near'));if(nr){const el=nr.n?document.querySelector(`.mnpc[data-n="${S.mm.npcs.indexOf(nr.n)}"]`):document.querySelector(`.mb[data-b="${nr.id}"]`);if(el)el.classList.add('near')}}
+ MAP.raf=requestAnimationFrame(mapLoop);
+}
+function measureMap(){if(!MAP)return;const w=$('#mapwrap');MAP.u=w.clientHeight/100;MAP.W=w.clientWidth;$('#town').style.setProperty('--u',MAP.u+'px')}
+window.addEventListener('resize',()=>{if(MAP&&MAP.on)measureMap()});
+function streetTap(e){
+ if(!MAP||!MAP.on||MAP.busy)return;
+ const el=e.target.closest('.mnpc,.mb,.mgift');if(!el)return;
+ if(el.classList.contains('mnpc')){const n=S.mm.npcs[+el.dataset.n];const side=n.wx>MAP.px?-4:4;walkTo(n.wx+side,()=>{MAP.face=n.wx>MAP.px?1:-1;talkNPC(n)})}
+ else if(el.classList.contains('mb')){const id=el.dataset.b;walkTo(MAP.B[id].cx,()=>enterBuilding(id))}
+ else{walkTo(S.mm.items[+el.dataset.g].wx)}
+}
 function pickupItem(){
  const st=S.stage;const r=Math.random();let lines,eff={};
  const unowned=Object.entries(WARDROBE).flatMap(([c,l])=>l.filter(i=>!S.owned.includes(i.id)&&i.st<=st&&i.price<=600).map(i=>[c,i]));
@@ -132,7 +196,7 @@ function sheetHead(title,art,sub){return `<div class="bmart" ${art?`style="backg
 function enterBuilding(id){
  if(!MAP||MAP.busy) return;
  const st=S.stage;
- if(id==='G'&&st<4){mapSay(['🚧 공사 중이다. "M 방송국 신축 · 오픈 예정"','(데뷔 후에 갈 수 있을 것 같다.)']);return}
+ if(id==='G'&&st<4){if(MAP.busy)return;mapSay(['🚧 공사 중이다. "M 방송국 신축 · 오픈 예정"','(데뷔 후에 갈 수 있을 것 같다.)']);return}
  MAP.busy=true;SFX.door();
  const acts=BACTS[id].map(a=>ACTS.find(x=>x.id===a)).filter(a=>a&&st>=a.s[0]&&st<=a.s[1]);
  const free=(BFREE[id]||[]);
@@ -172,15 +236,28 @@ function pkChoice(q,opts,who){
 }
 function openMap(){
  if(busy||!S) return;
- SFX.door();ensureMonth();MAP={on:true,busy:false,key:S.mm.key};
+ SFX.door();ensureMonth();
+ MAP={on:true,busy:false,key:S.mm.key,held:0,face:1,wt:0,goal:null,outfit:meOutfit()};
  document.body.classList.add('onmap');
- $('#town').innerHTML=townHTML();$('#places').innerHTML=placesHTML();renderSlots();
- window.scrollTo(0,0);
- if(!S.seen['tip_'+themeId()]){S.seen['tip_'+themeId()]=1;const tips={
-  town:['아래 장소 카드를 누르면 그곳에서 할 일정을 고를 수 있어!','🎁 선물 상자를 눌러 열어 보고, 사람을 눌러 말을 걸어 봐. ❗ 표시는 중요한 이야기야.','⭐ 표시 장소는 이번 달 핫스팟! 효과가 1.5배야.'],
-  gangnam:['✨ 강남 기획사 거리에 왔다! 유리 빌딩 사이로 회사 사옥이 보인다.','이제부터는 회사 사옥이 연습실이야. 핫스팟과 미션을 노려 보자!'],
-  broadcast:['🎆 상암 방송가! 방송국 앞엔 팬들이 응원봉을 들고 기다리고 있다!','💖 팬들에게 인사하면 힘이 나. 방송국 카드도 열렸어!'],
-  la:['🌴 LA 산타모니카! 바닷바람이 기분 좋다.','코칠라 무대를 향해, 마지막 스퍼트!']}[themeId()];mapSay(tips)}
+ streetLayout();MAP.px=MAP.B.F.cx+5;
+ $('#town').innerHTML=streetHTML();measureMap();
+ MAP.world=$('#mworld');MAP.sky=$('#town .msky');MAP.me=$('#mme');MAP.img=$('#mmeimg');
+ $('#mdyn').innerHTML=dynHTML();$('#places').innerHTML=placesHTML();renderSlots();
+ $('#town').onclick=streetTap;
+ window.scrollTo(0,0);MAP.raf=requestAnimationFrame(mapLoop);
+ if(!S.seen['tip2_'+themeId()]){S.seen['tip2_'+themeId()]=1;const tips={
+  town:['◀ ▶ 로 거리를 걸어 보자! 건물 앞에서 ▲(A)를 누르면 들어갈 수 있어.','🎁 선물 상자는 지나가기만 해도 주워져. ❗ 표시가 있는 사람은 중요한 이야기를 들려줄 거야.','건물이나 사람을 눌러도 그쪽으로 걸어가. 아래 장소 카드로 바로 가도 돼!'],
+  gangnam:['✨ 강남 기획사 거리에 왔다! 오늘도 사옥까지 걸어가 볼까?'],
+  broadcast:['🎆 방송국이 문을 열었다! 방송국 앞엔 팬들이 기다리고 있어.'],
+  la:['🌴 LA에 도착! 바닷바람 맞으며 걸어 보자.']}[themeId()];mapSay(tips)}
 }
-function closeMap(){if(MAP){MAP.on=false}document.body.classList.remove('onmap');$('#bmenu').classList.remove('show')}
-document.addEventListener('keydown',e=>{if(!MAP||!MAP.on||keyHandler||$('#sheetOv').classList.contains('show'))return;if(e.code==='KeyX'||e.code==='Escape'){actB()}});
+function closeMap(){if(MAP){MAP.on=false;cancelAnimationFrame(MAP.raf);MAP.held=0}document.body.classList.remove('onmap');$('#bmenu').classList.remove('show')}
+function padDown(d){if(MAP&&MAP.on)MAP.held=d}
+function padUp(){if(MAP)MAP.held=0}
+document.addEventListener('keydown',e=>{if(!MAP||!MAP.on||keyHandler||$('#sheetOv').classList.contains('show')||$('#vn').classList.contains('show')||$('#dress').classList.contains('show'))return;
+ if($('#bmenu').classList.contains('show')){if(e.code==='Escape'||e.code==='KeyX')actB();return}
+ const m={ArrowLeft:-1,KeyA:-1,ArrowRight:1,KeyD:1}[e.code];
+ if(m){e.preventDefault();MAP.held=m}
+ else if(['ArrowUp','KeyW','Space','Enter','KeyZ'].includes(e.code)){if(document.querySelector('.pkt,.cut,.skp,.sbox'))return;e.preventDefault();if(!e.repeat)mapAct()}
+ else if(e.code==='KeyX'||e.code==='Escape')actB();});
+document.addEventListener('keyup',e=>{if(!MAP)return;const m={ArrowLeft:-1,KeyA:-1,ArrowRight:1,KeyD:1}[e.code];if(m&&MAP.held===m)MAP.held=0});

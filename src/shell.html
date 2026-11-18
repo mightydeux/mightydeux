@@ -821,6 +821,69 @@ body.onmap #pad{display:flex}
  #tChar{height:420px!important}
  .logo{font-size:52px}
 }
+
+/* ===== 걷는 거리 ===== */
+#mapwrap{aspect-ratio:1/1;flex:none}#scene{flex:none}
+#mapwrap .pkt{min-height:0;padding:10px 14px 12px;font-size:14px}
+.mnpc.card .tav::after{content:'';position:absolute}
+#town{--u:4px;overflow:hidden;touch-action:manipulation}
+.msky{position:absolute;inset:0 0 18% 0;background:url('img/map_sky.webp') repeat-x;background-size:auto 100%}
+.msky::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,0) 50%,rgba(255,240,236,.6))}
+.msky.dusk{filter:hue-rotate(-12deg) saturate(.9)}.msky.evening{filter:hue-rotate(18deg) saturate(1.15) brightness(.92)}.msky.sunny{filter:hue-rotate(-28deg) saturate(1.25) brightness(1.08)}
+.mworld{position:absolute;left:0;top:0;bottom:0;will-change:transform}
+.mground{position:absolute;left:0;bottom:0;height:calc(var(--u)*24);background:
+ linear-gradient(#d9c3b8,#d9c3b8) 0 0/100% calc(var(--u)*1.2) no-repeat,
+ linear-gradient(90deg,rgba(255,255,255,.35) 0 2px,transparent 2px) 0 calc(var(--u)*1.2)/calc(var(--u)*9) 100%,
+ linear-gradient(rgba(255,255,255,.3) 0 2px,transparent 2px) 0 calc(var(--u)*1.2)/100% calc(var(--u)*5.5),
+ linear-gradient(#f3e4dc,#ecd8cf 70%,#e2c9bf)}
+.mground::after{content:'';position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*4);background:linear-gradient(#cdb4aa,#bfa59b)}
+.mb{position:absolute;bottom:calc(var(--u)*22.5);cursor:pointer;transition:filter .2s}
+.mb img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 100%;pointer-events:none;filter:drop-shadow(0 6px 6px rgba(120,80,70,.18))}
+.mb.near img{filter:drop-shadow(0 0 calc(var(--u)*1.2) #fff) drop-shadow(0 0 calc(var(--u)*2.4) rgba(255,180,205,.9))}
+.mb.lock img{filter:grayscale(.3) brightness(.97)}
+.msign{position:absolute;transform:translate(-50%,0);white-space:nowrap;background:linear-gradient(#fffdfb,#fbefe9);border:1px solid #e8cfc6;border-radius:calc(var(--u)*1);padding:calc(var(--u)*.5) calc(var(--u)*1.6);font-family:var(--fh);font-size:calc(var(--u)*2.7);color:#7a4a58;box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1.2) rgba(120,70,70,.2);pointer-events:none}
+.mb.open .msign{background:linear-gradient(90deg,#ffe3ec,#f1e3ff);color:#b44a6d}
+.mb.open::after{content:'GRAND OPEN ✦';position:absolute;left:50%;top:44%;transform:translateX(-50%) rotate(-4deg);background:#ec8fa8;color:#fff;font-family:var(--fn);font-weight:800;font-size:calc(var(--u)*2.4);padding:calc(var(--u)*.4) calc(var(--u)*1.6);border-radius:999px;box-shadow:0 4px 10px rgba(217,102,138,.4);pointer-events:none}
+.mhot{position:absolute;left:50%;top:calc(var(--u)*-4.5);transform:translateX(-50%);background:#fff3d6;border:1px solid #f0d3a8;color:#b07a2a;border-radius:999px;padding:calc(var(--u)*.3) calc(var(--u)*1.4);font-weight:700;font-size:calc(var(--u)*2.3);white-space:nowrap;animation:bob 1.6s infinite;pointer-events:none}
+.mme,.mnpc,.mgift,.mfans{position:absolute;transform:translateX(-50%)}
+.mme{bottom:calc(var(--u)*5);height:calc(var(--u)*31);z-index:5;pointer-events:none}
+.mme img{height:100%;display:block;filter:drop-shadow(0 calc(var(--u)*1) calc(var(--u)*.8) rgba(90,50,60,.25))}
+.mme::before{content:'';position:absolute;left:15%;right:15%;bottom:calc(var(--u)*-.6);height:calc(var(--u)*1.6);border-radius:50%;background:rgba(110,70,70,.18)}
+.mme.left img{transform:scaleX(-1)}
+.mme.walk img{animation:mwalk .34s ease-in-out infinite}
+@keyframes mwalk{0%,100%{translate:0 0}50%{translate:0 calc(var(--u)*-1.1)}}
+.mnpc{bottom:calc(var(--u)*7);z-index:4;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.mnpc.sd img{height:calc(var(--u)*29);display:block;transform:scaleX(-1);filter:drop-shadow(0 calc(var(--u)*1) calc(var(--u)*.8) rgba(90,50,60,.22));pointer-events:none}
+.mnpc.card .tav{width:calc(var(--u)*15);height:calc(var(--u)*15);margin-bottom:calc(var(--u)*10)}
+.mnpc b{margin-top:calc(var(--u)*.6);background:rgba(255,253,251,.95);border-radius:999px;padding:calc(var(--u)*.3) calc(var(--u)*1.6);font-size:calc(var(--u)*2.6);font-weight:700;color:#6a4f58;white-space:nowrap;box-shadow:0 2px 6px rgba(90,50,60,.15)}
+.mnpc .tbang,.mnpc .ttalk{position:relative;top:auto;right:auto;margin-bottom:calc(var(--u)*.6);width:calc(var(--u)*5);height:calc(var(--u)*5);font-size:calc(var(--u)*3)}
+.mnpc.done{opacity:.8}
+.mnpc.near b{background:var(--pink);color:#fff}
+.mnpc.story.sd img{filter:drop-shadow(0 0 calc(var(--u)*1.4) #ffe39a)}
+.mgift{bottom:calc(var(--u)*8);font-size:calc(var(--u)*7);z-index:3;cursor:pointer;animation:gift2 1.3s ease-in-out infinite;filter:drop-shadow(0 calc(var(--u)*1) 4px rgba(90,50,60,.3))}
+@keyframes gift2{50%{translate:0 calc(var(--u)*-1.6)}}
+.mfans{bottom:calc(var(--u)*5);z-index:3;font-size:calc(var(--u)*7);display:flex;flex-direction:column;align-items:center;white-space:nowrap}
+.mfans b{font-size:calc(var(--u)*2.6);background:linear-gradient(90deg,#f29ab3,#c49ae8);color:#fff;border-radius:999px;padding:calc(var(--u)*.3) calc(var(--u)*1.6)}
+.mhint{position:absolute;left:50%;bottom:10px;transform:translate(-50%,10px);z-index:6;opacity:0;transition:.2s;background:rgba(255,253,251,.96);border:1px solid var(--edge);border-radius:999px;padding:6px 14px;box-shadow:0 6px 18px rgba(120,60,80,.2);white-space:nowrap;display:flex;gap:8px;align-items:center;pointer-events:none}
+.mhint.on{opacity:1;transform:translate(-50%,0)}
+.mhint b{font-size:13px}.mhint small{font-size:10.5px;color:#fff;background:var(--pink);border-radius:999px;padding:1px 7px;font-weight:700}
+.mkeys{display:none}
+#pad{align-items:stretch}
+#pad .mv{display:flex;gap:6px;flex:2.2}
+#pad .mv button{flex:1;font-size:22px;color:#b44a6d;background:linear-gradient(#fff,#fdeef2);touch-action:none;user-select:none}
+#pad .mv button:active{background:#fbd9e3;transform:scale(.96)}
+#pad button.sm{flex:1}
+#pad button.home{flex:1.1}
+#pad .abtn{flex:1.5;background:linear-gradient(135deg,#f29ab3,#c49ae8);border:none;color:#fff;font-family:var(--fn);font-weight:800;font-size:22px;line-height:1;justify-content:center;box-shadow:0 6px 14px rgba(217,102,138,.3)}
+#pad .abtn small{font-family:var(--fb);font-size:10px;font-weight:700;margin-top:3px}
+#pad .abtn.glow{animation:pop .7s infinite alternate;box-shadow:0 0 0 3px #fff,0 0 18px rgba(236,143,168,.8)}
+@media (min-width:960px){
+ body.onmap #app{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hdr hdr" "map map" "places slot" "places pad";grid-template-rows:auto auto auto 1fr}
+ #mapwrap{aspect-ratio:auto;height:min(60vh,560px);min-height:400px}
+ .mkeys{display:block;position:absolute;right:12px;bottom:10px;z-index:6;font-size:11.5px;color:#8a6f76;background:rgba(255,253,251,.85);border-radius:999px;padding:3px 10px}
+ .mhint{bottom:12px}
+ #places{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
@@ -847,9 +910,10 @@ body.onmap #pad{display:flex}
   <button id="trainBtn" onclick="toggleTrain()"><span>🎯</span>훈련 게임 ON</button>
 </div></div>
 <div id="pad">
-  <button onclick="openList()"><span>📋</span>일정 목록</button>
-  <button onclick="openStatus('me')"><span>💗</span>내 상태</button>
-  <button class="home" onclick="closeMap();render()"><span>🏠</span>숙소로 돌아가기</button>
+  <div class="mv"><button id="pl" onpointerdown="padDown(-1)" onpointerup="padUp()" onpointerleave="padUp()" onpointercancel="padUp()">◀</button><button id="pr" onpointerdown="padDown(1)" onpointerup="padUp()" onpointerleave="padUp()" onpointercancel="padUp()">▶</button></div>
+  <button class="sm" onclick="openList()"><span>📋</span>목록</button>
+  <button class="sm home" onclick="closeMap();render()"><span>🏠</span>숙소로</button>
+  <button id="pa" class="abtn" onclick="mapAct()">A<small>들어가기·대화</small></button>
 </div>
 </div>
 <div id="bmenu"></div>

@@ -6,11 +6,18 @@
    새 그림을 추가하려면 img/에 파일을 넣고 아래 ART 표에 경로만 적으면 된다. */
 const ART={
  me:{practice:'img/me_practice.webp',hoodie:'img/me_hoodie.webp',daily:'img/me_daily.webp'},
- npc:{arteam:'img/npc_manager.webp',cafe:'img/npc_cafe.webp'},
+ npc:{arteam:'img/npc_manager.webp',cafe:'img/npc_cafe.webp',harin:'img/sd_harin.webp',woojin:'img/sd_woojin.webp'},
+ /* 마을을 걷는 SD 그림 (오른쪽을 보는 그림 — 왼쪽으로 걸을 땐 뒤집어서 씀) */
+ sd:{
+  me:{practice:['img/sd_practice_1.webp','img/sd_practice_2.webp'],hoodie:['img/sd_hoodie_1.webp','img/sd_hoodie_2.webp'],daily:['img/sd_daily_1.webp']},
+  npc:{cafe:'img/sd_cafe.webp',arteam:'img/sd_arteam.webp',woojin:'img/sd_woojin.webp',harin:'img/sd_harin.webp'},
+ },
 };
+/* SD 그림을 상반신 카드로 쓸 때는 덜 확대한다 */
+const BUST_SIZE={'img/sd_harin.webp':'150% auto','img/sd_woojin.webp':'175% auto'};
 const ARTBG={env_street:'img/env_street.webp',env_studio:'img/env_studio.webp',env_company:'img/env_company.webp',bg_home:'img/bg_home.webp',bg_practice:'img/bg_practice.webp',bg_cafe:'img/bg_cafe.webp'};
 /* 얼굴 위치 (상반신 카드를 자를 때 기준점) */
-const FOCUS={'img/me_practice.webp':'50% 1%','img/me_hoodie.webp':'44% 1%','img/me_daily.webp':'50% 1%','img/npc_manager.webp':'50% 1%','img/npc_cafe.webp':'40% 1%'};
+const FOCUS={'img/sd_harin.webp':'50% 0%','img/sd_woojin.webp':'50% 0%','img/me_practice.webp':'50% 1%','img/me_hoodie.webp':'44% 1%','img/me_daily.webp':'50% 1%','img/npc_manager.webp':'50% 1%','img/npc_cafe.webp':'40% 1%'};
 function mix(h,w){const n=parseInt(h.slice(1),16);let r=n>>16,g=(n>>8)&255,b=n&255;const f=c=>Math.round(c+(w>0?(255-c)*w:c*w));return '#'+[f(r),f(g),f(b)].map(c=>Math.max(0,Math.min(255,c)).toString(16).padStart(2,'0')).join('')}
 /* 지금 입은 옷 → 어떤 그림을 쓸지 */
 function meOutfit(w){
@@ -34,7 +41,7 @@ function girl(p){
  else src=ART.me[p.outfit||meOutfit(p.wear)];
  if(!src) return phCard(ph[0],ph[1],bust);
  const mood=p.expr==='sad'||p.expr==='tired'?' sad':'';
- return `<div class="gi ${bust?'bust':'full'}${mood}" style="background-image:url('${src}');${bust?`background-position:${FOCUS[src]||'50% 1%'}`:''}"></div>`;
+ return `<div class="gi ${bust?'bust':'full'}${mood}" style="background-image:url('${src}');${bust?`background-position:${FOCUS[src]||'50% 1%'};${BUST_SIZE[src]?`background-size:${BUST_SIZE[src]}`:''}`:''}"></div>`;
 }
 function portrait(who,expr){if(who==='me')return girl({...playerLook(),bust:true,expr});const c=CAST[who];return c?girl({...c.look,who,bust:true,expr}):phCard('?','#ccc',true)}
 /* 일정마다 장면 배경 */
