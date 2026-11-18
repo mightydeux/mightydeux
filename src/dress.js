@@ -1,6 +1,15 @@
 /* ============ 옷장 · 상점 (드래그해서 입히기) ============ */
 const CONCEPT={pure:'청순',charisma:'걸크러시',bright:'하이틴'};
-const CROP={hair:'50 30 140 170',top:'48 186 144 170',bot:'40 318 160 230',shoe:'56 500 128 60',acc:'56 30 128 110'};
+/* 옷 카드 썸네일: 아이템 색 + 아이콘 */
+function swatch(cat,it){
+ const v=it.v;let c='#f4dfe6',e='✨';
+ if(cat==='hair'){c=v.hc;e='💇‍♀️'}
+ else if(cat==='top'){c=v.c1;e={hoodie:'🧥',tee:'👕',jacket:'🧥',cardigan:'🧶',dress:'👗'}[v.type]||'👕'}
+ else if(cat==='bot'){c=v.c;e={pants:'👖',skirt:'🎀',shorts:'🩳'}[v.type]||'👖'}
+ else if(cat==='shoe'){c=v;e=it.id==='s3'?'🥿':it.id==='s4'?'👠':'👟'}
+ else if(cat==='acc'){e={ribbon:'🎀',headband:'🌸',cap:'🧢',pin:'⭐',beret:'🧶',tiara:'👑'}[v]||'🎀';c='#ffe3ec'}
+ return `<span class="swc" style="background:${c}"></span><span class="swe">${e}</span>`;
+}
 const CATN={hair:'헤어',top:'상의',bot:'하의',shoe:'신발',acc:'액세서리'};
 function wearItem(cat){return WARDROBE[cat].find(i=>i.id===S.wear[cat])||WARDROBE[cat][0]}
 function lookFromWear(w){const t=WARDROBE.top.find(i=>i.id===w.top),b=WARDROBE.bot.find(i=>i.id===w.bot),sh=WARDROBE.shoe.find(i=>i.id===w.shoe),a=WARDROBE.acc.find(i=>i.id===w.acc),h=WARDROBE.hair.find(i=>i.id===(w.hair||'h0'));return {top:t.v,bot:t.dress?{type:'none'}:b.v,shoe:sh.v,acc:a.v,...h.v}}
@@ -22,11 +31,11 @@ function drawDress(){
  } else {
   const items=WARDROBE[DR.cat].filter(it=>shop?(!it.sig||S.owned.includes(it.id)):S.owned.includes(it.id));
   list=`<div class="dgrid">${items.map(it=>{const own=S.owned.includes(it.id),lock=it.st>S.stage,on=w[DR.cat]===it.id;const pv={...w,[DR.cat]:it.id};if((DR.cat==='bot'||DR.cat==='shoe')&&WARDROBE.top.find(x=>x.id===w.top).dress)pv.top='t0';
-   return `<div class="dcard ${on?'on':''} ${lock?'lock':''}" data-id="${it.id}"><div class="dimg">${lock?'<span class="lk">🔒</span>':girl(playerLook({...lookFromWear(pv),expr:'smile',mic:false,crown:false})).replace(/viewBox="[^"]+"/,`viewBox="${CROP[DR.cat]}"`)}</div><b>${it.name}</b><small>${it.tag?CONCEPT[it.tag]+' · ':''}비주얼+${it.vis}</small>${lock?`<small class="pr">${(STAGES[it.st]||{name:'특별'}).name}부터</small>`:shop&&!own?`<button class="buy" onclick="event.stopPropagation();buyWear('${DR.cat}','${it.id}')" ${S.money<it.price?'disabled':''}>${it.price}G 구매</button>`:`<small class="pr">${on?'착용 중':'보유'}</small>`}</div>`}).join('')}</div>`;
+   return `<div class="dcard ${on?'on':''} ${lock?'lock':''}" data-id="${it.id}"><div class="dimg">${lock?'<span class="lk">🔒</span>':swatch(DR.cat,it)}</div><b>${it.name}</b><small>${it.tag?CONCEPT[it.tag]+' · ':''}비주얼+${it.vis}</small>${lock?`<small class="pr">${(STAGES[it.st]||{name:'특별'}).name}부터</small>`:shop&&!own?`<button class="buy" onclick="event.stopPropagation();buyWear('${DR.cat}','${it.id}')" ${S.money<it.price?'disabled':''}>${it.price}G 구매</button>`:`<small class="pr">${on?'착용 중':'보유'}</small>`}</div>`}).join('')}</div>`;
  }
- const look=playerLook({...lookFromWear(w),expr:'happy',mic:false,crown:false});
+ const look=playerLook({...lookFromWear(w),wear:w,expr:'happy'});
  ov.innerHTML=`<div class="dwrap"><div class="dhead"><b>${shop?'🛍️ 옷가게·장비 상점':'👗 옷장'}</b><span>💰 ${S.money.toLocaleString()} G</span><button class="x" onclick="closeDress()">✕</button></div>
-  <div class="dstage" id="dzone"><div class="dmirror"></div><div class="dchar" id="dchar">${girl(look)}</div><div class="dinfo">✨ 비주얼 +${wearVis(w)}<br><small>${coordiText(w)}</small></div><div class="dhint">${shop?'옷을 끌어다 입혀 보고, 마음에 들면 구매!':'옷을 캐릭터에게 끌어다 놓으면 입혀져요'}</div></div>
+  <div class="dstage" id="dzone"><div class="dmirror"></div><div class="dchar" id="dchar">${girl(look)}</div><div class="dinfo">✨ 비주얼 +${wearVis(w)}<br><small>${coordiText(w)}</small><br><small>👀 ${OUTFIT_NAME[meOutfit(w)]} 스타일</small></div><div class="dhint">${shop?'옷을 끌어다 입혀 보고, 마음에 들면 구매!':'옷을 캐릭터에게 끌어다 놓으면 입혀져요'}</div></div>
   <div class="dtabs">${tabs.map(t=>`<button class="${DR.cat===t?'on':''}" onclick="DR.cat='${t}';drawDress()">${tl[t]}</button>`).join('')}</div>
   <div class="dlist">${(DR.cat==='bot'||DR.cat==='shoe')&&WARDROBE.top.find(x=>x.id===w.top).dress&&DR.cat==='bot'?'<div class="dnote">👗 원피스를 입은 상태예요. 하의를 입히면 상의가 원피스 대신 다른 상의로 바뀌어요.</div>':''}${list}</div>
   ${!shop?`<button class="big" onclick="applyWear()">이대로 입기 ✔</button>`:`<button class="big" onclick="applyWear()">${JSON.stringify(w)!==JSON.stringify(S.wear)&&canWear(w)?'입어 본 옷으로 갈아입고 나가기':'나가기'}</button>`}</div>`;

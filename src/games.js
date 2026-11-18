@@ -82,7 +82,7 @@ async function gDDR(sub){
 }
 
 /* 4. 카메라 테스트 */
-const FACES=[['smile','청순한 미소'],['wink','윙크'],['surprise','깜짝 놀란 표정'],['smug','카리스마 눈빛'],['sad','애절한 표정'],['happy','활짝 웃기']];
+const FACES=[['smile','청순한 미소','😊'],['wink','윙크','😉'],['surprise','깜짝 놀란 표정','😮'],['smug','카리스마 눈빛','😏'],['sad','애절한 표정','🥺'],['happy','활짝 웃기','😆']];
 async function gCamera(sub){
  await mgIntro('📸 카메라 테스트','두 가지 미션이 섞여 나와요.\n\n🔴 빨간불 카메라 찾기 — 음방에서 지금 찍고 있는 카메라(빨간불)를 빨리 찾아 터치!\n🎭 표정 연기 — 디렉터가 말한 표정을 골라 터치!\n\n빠를수록 점수가 높아요.',sub);
  const R=8; let total=0;
@@ -102,7 +102,7 @@ function camRed(r,R){return new Promise(res=>{
 })}
 function camFace(r,R){return new Promise(res=>{
  const opts=shuffle(FACES).slice(0,3), ans=pick(opts), limit=2.6;
- mgBox().innerHTML=`<h3>🎭 표정 연기 (${r+1}/${R})</h3><div class="prompt">디렉터: "${ans[1]}!"</div><div class="tbar"><i id="tb2" style="width:100%"></i></div><div class="faces">${opts.map((o,i)=>`<button data-i="${i}">${girl(playerLook({bust:true,expr:o[0],mic:false,crown:false}))}</button>`).join('')}</div><div class="judge" id="jg"></div>`;
+ mgBox().innerHTML=`<h3>🎭 표정 연기 (${r+1}/${R})</h3><div class="prompt">디렉터: "${ans[1]}!"</div><div class="tbar"><i id="tb2" style="width:100%"></i></div><div class="faces">${opts.map((o,i)=>`<button data-i="${i}"><span class="fem">${o[2]}</span></button>`).join('')}</div><div class="judge" id="jg"></div>`;
  const t0=performance.now();let done=false;
  const finish=s=>{if(done)return;done=true;$('#jg').textContent=s>=80?'PERFECT!':s>0?'GOOD':'MISS';$('#jg').style.color=s>=80?'#ffd36e':s>0?'#ff7eb6':'#888';setTimeout(()=>res(s),450)};
  const tick=()=>{if(done)return;const e=(performance.now()-t0)/1000;$('#tb2').style.width=Math.max(0,100-e/limit*100)+'%';if(e>limit){finish(0);return}requestAnimationFrame(tick)};tick();

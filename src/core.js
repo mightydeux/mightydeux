@@ -184,18 +184,12 @@ const CAST={
  jenny:{name:'LA 코디 제니',role:'LA 현지 코디네이터',look:{hair:'wave',hc:'#e8c070',hh:'#fff0c0',eye:'#4a6a9a',top:{type:'jacket',c1:'#e84a5a',c2:'#ffffff'},expr:'happy'}},
  mike:{name:'프로듀서 마이크',role:'LA 히트곡 프로듀서',look:{hair:'short',hc:'#3a2a1a',hh:'#6a5a4a',eye:'#3a2a20',male:true,acc:'cap',top:{type:'hoodie',c1:'#4a6a9a',c2:'#2a4a7a',logo:'LA'},expr:'smile'}},
  emily:{name:'미국 팬 에밀리',role:'LA 팬클럽 회원',look:{hair:'twin',hc:'#f0d090',hh:'#fff4d0',eye:'#3a7a5a',top:{type:'tee',c1:'#ffffff',logo:'I♥KPOP'},expr:'happy'}},
- arteam:{name:'A&R 팀장 서윤',role:'기획사 A&R 팀장 · 컴백 기획 담당',img:'img/npc_staff.webp',look:{hair:'bob',hc:'#2a2026',hh:'#5a4a50',eye:'#4a3a30',top:{type:'cardigan',c1:'#e8dcc4',c2:'#9aa0b8'},expr:'smile'}},
- cafe:{name:'봄날 카페 다온',role:'방송국 앞 카페 사장님',img:'img/npc_cafe.webp',look:{hair:'pony',hc:'#6a4030',hh:'#a07a60',eye:'#6a4a3a',top:{type:'hoodie',c1:'#2a3050',c2:'#6a7a5a'},expr:'happy'}},
+ arteam:{name:'A&R 팀장 서윤',role:'기획사 A&R 팀장 · 컴백 기획 담당',look:{hair:'bob',hc:'#2a2026',hh:'#5a4a50',eye:'#4a3a30',top:{type:'cardigan',c1:'#e8dcc4',c2:'#9aa0b8'},expr:'smile'}},
+ cafe:{name:'봄날 카페 다온',role:'방송국 앞 카페 사장님',look:{hair:'pony',hc:'#6a4030',hh:'#a07a60',eye:'#6a4a3a',top:{type:'hoodie',c1:'#2a3050',c2:'#6a7a5a'},expr:'happy'}},
  trainee:{name:'동기 보미',role:'',look:{hair:'pony',hc:'#6a4a3a',hh:'#9a7a6a',eye:'#6a4a3a',top:{type:'hoodie',c1:'#b9bdc7',c2:'#8f94a0'},expr:'normal'}},
 };
 const MAINCAST=['harin','jiyu','chaewon','rena','mikyung','leo','granny','woojin','seoa','pd','trainer','reporter','fanmaster','jenny','mike','emily','arteam','cafe'];
-/* ===== 데뷔 이후 일러스트 (girlgroup_concept) =====
-   새 이미지를 추가하면 여기 경로만 바꾸면 됩니다. 표정별 이미지가 생기면 ME.smile 등으로 추가 */
-const IMG={room:'img/room_debut.webp',practice:'img/practice.webp',street:'img/bg_street.webp',studio:'img/bg_studio.webp',agency:'img/bg_agency.webp'};
-const ME={default:'img/me_idol.webp'};
-const isIdol=()=>S&&S.stage>=4;
-function meImg(expr){return ME[expr]||ME.default}
-function portrait(who,expr){const c=CAST[who];if(c&&c.img)return `<img class="pimg" src="${c.img}" alt="">`;if(who==='me'&&isIdol())return `<img class="pimg" src="${meImg(expr)}" alt="">`;return who==='me'?girl(playerLook({bust:true,expr:expr||'smile',crown:false})):girl({...c.look,bust:true,expr:expr||c.look.expr})}
+for(const k in CAST)CAST[k].look.who=k;
 const ALLOW=[100,130,180,180,0,0,0,0], SETTLE=[0,0,0,0,250,400,600,800];
 
 /* ============ 상태 ============ */
@@ -237,9 +231,9 @@ function trainGame(id){return TRAIN[id]?pick(TRAIN[id]):null}
 const FILLER_LOOK={'한유이':{hair:'bob',hc:'#5a3a2a',hh:'#9a7a6a',eye:'#7a4a2a'},'송다은':{hair:'wave',hc:'#2a2030',hh:'#6a5a7a',eye:'#5a3a6a'},'진세아':{hair:'pony',hc:'#8a5a3a',hh:'#c09a7a',eye:'#6a4a3a'}};
 function teamLooks(){
  const w=lookFromWear(S.wear);const uni={top:w.top,bot:w.bot,shoe:w.shoe,acc:'none',mic:S.stage>=4};
- return teamNames().slice(1).map(nm=>{const ck=Object.keys(CAST).find(k=>CAST[k].name===nm);const L=ck?CAST[ck].look:FILLER_LOOK[nm]||FILLER_LOOK['한유이'];return {hair:L.hair,hc:L.hc,hh:L.hh,eye:L.eye,...uni}});
+ return teamNames().slice(1).map(nm=>{const ck=Object.keys(CAST).find(k=>CAST[k].name===nm);const L=ck?CAST[ck].look:FILLER_LOOK[nm]||FILLER_LOOK['한유이'];return {hair:L.hair,hc:L.hc,hh:L.hh,eye:L.eye,...uni,who:ck||null,tm:nm}});
 }
-function showTeam(on,anim){const t=$('#team');if(!on){t.innerHTML='';return}const L=teamLooks();t.innerHTML=L.map((l,i)=>`<div class="tm t${i} a-${anim}" style="animation-delay:${i*.08}s">${girl({...l,expr:pick(['smile','happy','wink'])})}</div>`).join('')}
+function showTeam(on,anim){const t=$('#team');if(!on){t.innerHTML='';return}const L=teamLooks();t.innerHTML=L.map((l,i)=>`<div class="tm t${i} a-${anim}" style="animation-delay:${i*.08}s">${girl({...l,bust:true})}<small>${l.tm||''}</small></div>`).join('')}
 const CONCERTS=[{f:250,name:'첫 팬미팅',venue:'블루스퀘어 홀',seats:1700,lv:1},{f:650,name:'첫 단독 콘서트',venue:'올림픽홀',seats:3000,lv:2},{f:1200,name:'체조경기장 콘서트',venue:'KSPO DOME',seats:15000,lv:3},{f:2000,name:'스타디움 콘서트',venue:'잠실 올림픽주경기장',seats:60000,lv:4}];
 async function checkConcert(){
  if(S.stage<4) return;
@@ -282,34 +276,8 @@ const CHECK=[
 ];
 
 /* ============ 그림 ============ */
-function playerLook(o={}){const w=S?lookFromWear(S.wear):{top:WARDROBE.top[0].v,bot:WARDROBE.bot[0].v,shoe:'#fff',acc:'ribbon'};return {hair:'long',hc:'#2b2030',hh:'#6a5578',eye:'#8a4f7a',...w,mic:S&&S.stage>=4&&S.stage<=5,crown:S&&S.stage>=7,...o}}
+function playerLook(o={}){const w=S?{...lookFromWear(S.wear),wear:S.wear}:{top:WARDROBE.top[0].v,bot:WARDROBE.bot[0].v,shoe:'#fff',acc:'ribbon'};return {hair:'long',hc:'#2b2030',hh:'#6a5578',eye:'#8a4f7a',...w,mic:S&&S.stage>=4&&S.stage<=5,crown:S&&S.stage>=7,...o}}
 function moodExpr(){return S.stress<40?'smile':S.stress<70?'normal':'tired'}
-const VB='viewBox="0 0 360 352" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"';
-function roomSVG(){
- const st=S.stage;
- const wall=st>=6?'#ffe8d0':st>=4?'#f0e0ff':st>=2?'#e8ecf8':'#ffe9ef';
- const pat=st>=4?'#e4d0f4':st>=2?'#dbe0f0':'#ffd6e2';
- const posters=st>=4?['#ff7eb6','#ffd36e','#9ed2ff']:['#c9b6ff','#9ed2ff'];
- return `<svg ${VB}><defs><pattern id="wp" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="${wall}"/><circle cx="6" cy="6" r="2" fill="${pat}"/><circle cx="18" cy="18" r="2" fill="${pat}"/></pattern></defs>
- <rect width="360" height="352" fill="url(#wp)"/><rect y="236" width="360" height="116" fill="#c99a6a"/>${[0,1,2,3,4,5].map(i=>`<rect y="${244+i*18}" width="360" height="2" fill="#b0845a"/>`).join('')}
- <rect y="228" width="360" height="10" fill="#fff" opacity=".8"/>
- <rect x="24" y="40" width="96" height="80" rx="4" fill="#bfe6ff" stroke="#8a6a4a" stroke-width="6"/><path d="M72 40 L72 120 M24 80 L120 80" stroke="#8a6a4a" stroke-width="4"/><path d="M30 46 L60 46 L36 74Z" fill="#fff" opacity=".7"/>
- <rect x="18" y="34" width="20" height="96" fill="#ffb6cf" opacity=".85"/><rect x="106" y="34" width="20" height="96" fill="#ffb6cf" opacity=".85"/>
- ${posters.map((c,i)=>`<rect x="${250+i*30}" y="${50+(i%2)*12}" width="26" height="36" fill="${c}" stroke="#fff" stroke-width="2" transform="rotate(${i*5-5} ${263+i*30} ${68})"/>`).join('')}
- <rect x="236" y="150" width="104" height="70" rx="6" fill="#fff" stroke="#c9a2ff" stroke-width="4"/><rect x="242" y="156" width="92" height="40" fill="#ffe0ec"/><text x="288" y="182" font-size="12" text-anchor="middle" fill="#a02a62" font-family="Jua">${S.stage>=4?(S.group||'')+' ♥':'DREAM'}</text>
- <rect x="20" y="170" width="90" height="62" rx="6" fill="#ffffff" stroke="#e2a0b8" stroke-width="4"/><rect x="26" y="158" width="78" height="18" rx="8" fill="#ffd6e6"/>
- ${st>=4?`<g transform="translate(150 30)"><rect width="60" height="40" rx="4" fill="#ffd36e"/><text x="30" y="26" font-size="16" text-anchor="middle">🏆</text></g>`:''}
- <ellipse cx="180" cy="300" rx="80" ry="16" fill="#e8b8c8" opacity=".6"/></svg>`;
-}
-const ACTBG={
- A:()=>`<svg ${VB}><rect width="360" height="352" fill="#f3e2c4"/>${[14,128,242].map(x=>`<rect x="${x}" y="30" width="104" height="200" fill="#d5ebf5" stroke="#b9a07a" stroke-width="4"/><path d="M${x+14} 222 L${x+64} 38 L${x+80} 38 L${x+30} 222Z" fill="#fff" opacity=".5"/>`).join('')}<rect y="168" width="360" height="5" fill="#8a6a44"/><rect y="240" width="360" height="112" fill="#c98f55"/>${[0,1,2,3,4].map(i=>`<rect y="${250+i*20}" width="360" height="1.5" fill="#a8723f"/>`).join('')}</svg>`,
- B:()=>`<svg ${VB}><rect width="360" height="352" fill="#dff0ff"/><rect x="20" y="30" width="320" height="110" fill="#9ad8ff" stroke="#6a8aa8" stroke-width="5"/><path d="M20 120 Q100 90 180 112 Q260 132 340 100 L340 140 L20 140Z" fill="#7ac070"/><rect y="230" width="360" height="122" fill="#5a6a7a"/>${[0,1].map(i=>`<g transform="translate(${30+i*230} 170)"><rect width="80" height="14" rx="4" fill="#333"/><rect x="66" y="-50" width="8" height="56" fill="#555"/><rect x="56" y="-56" width="28" height="10" rx="3" fill="#ff7eb6"/></g>`).join('')}<text x="180" y="22" font-size="12" text-anchor="middle" fill="#3a6a9a" font-family="Jua">FITNESS · RUN</text></svg>`,
- C:()=>`<svg ${VB}><rect width="360" height="352" fill="#fff0d8"/><rect x="0" y="0" width="360" height="30" fill="#e8a23a"/>${[0,1,2,3,4,5,6,7,8].map(i=>`<path d="M${i*40} 30 l20 16 l20 -16z" fill="${i%2?'#fff':'#ff7eb6'}"/>`).join('')}<rect x="30" y="70" width="120" height="80" rx="6" fill="#3a2a2a"/><text x="90" y="98" font-size="12" text-anchor="middle" fill="#fff" font-family="Jua">MENU</text><text x="90" y="118" font-size="10" text-anchor="middle" fill="#ffd36e" font-family="Jua">떡볶이 · 샐러드</text><rect y="220" width="360" height="132" fill="#d8a878"/><rect x="0" y="200" width="360" height="30" fill="#a8784a"/><circle cx="300" cy="120" r="30" fill="#7ac070"/><rect x="292" y="140" width="16" height="40" fill="#c97a4a"/></svg>`,
- D:()=>`<svg ${VB}><rect width="360" height="352" fill="#fde6f4"/><rect x="90" y="30" width="180" height="170" rx="90" fill="#fff" stroke="#e8b0d0" stroke-width="8"/><rect x="104" y="44" width="152" height="142" rx="76" fill="#e8f4ff"/>${Array.from({length:10},(_,i)=>{const a=Math.PI*(i/9);return `<circle cx="${180-Math.cos(a)*100}" cy="${115-Math.sin(a)*95}" r="7" fill="#fff6b0" stroke="#e8c060"/>`}).join('')}<rect y="230" width="360" height="122" fill="#f4c8dc"/><rect x="60" y="210" width="240" height="24" rx="6" fill="#fff"/></svg>`,
- E:()=>`<svg ${VB}><rect width="360" height="352" fill="#eef4e4"/><rect x="20" y="30" width="200" height="120" fill="#2e5a3e" stroke="#8a6a4a" stroke-width="8"/><text x="120" y="80" font-size="18" text-anchor="middle" fill="#fff" font-family="Jua">Hello, world!</text><text x="120" y="110" font-size="13" text-anchor="middle" fill="#ffd36e" font-family="Jua">인터뷰 · 영어 · 예능</text>${[0,1,2,3].map(i=>`<rect x="250" y="${30+i*40}" width="90" height="34" fill="#c89a6a"/>${[0,1,2,3,4].map(j=>`<rect x="${254+j*17}" y="${34+i*40}" width="12" height="28" fill="${['#ff7eb6','#9ed2ff','#ffd36e','#9be59b','#c9a2ff'][(i+j)%5]}"/>`).join('')}`).join('')}<rect y="236" width="360" height="116" fill="#b8a080"/></svg>`,
- F:()=>roomSVG(),
- G:()=>`<svg ${VB}><defs><linearGradient id="sp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><radialGradient id="led"><stop offset="0" stop-color="#ff7eb6"/><stop offset="1" stop-color="#2a0a3a"/></radialGradient></defs><rect width="360" height="352" fill="#0d0418"/><rect x="20" y="24" width="320" height="200" fill="url(#led)" opacity=".8"/>${Array.from({length:6},(_,i)=>{const x=20+i*64;return `<polygon points="${x-4},0 ${x+4},0 ${180+(x-180)*.3+34},352 ${180+(x-180)*.3-34},352" fill="url(#sp)" opacity=".5"><animate attributeName="opacity" values=".2;.65;.2" dur="${1.2+i*.3}s" repeatCount="indefinite"/></polygon>`}).join('')}<rect y="262" width="360" height="90" fill="#1a1028"/><rect y="262" width="360" height="3" fill="#ff7eb6"/>${Array.from({length:20},(_,i)=>`<circle cx="${9+i*18}" cy="${338+(i%2)*6}" r="5" fill="${['#ff7eb6','#ffd36e','#9ed2ff'][i%3]}"><animate attributeName="cy" values="${338+(i%2)*6};${330+(i%2)*6};${338+(i%2)*6}" dur=".8s" begin="${i*.05}s" repeatCount="indefinite"/></circle>`).join('')}</svg>`,
-};
 function bldOf(actId){for(const k in BACTS)if(BACTS[k].includes(actId))return k;return 'F'}
 function moodInfo(){
  const s=S.stress;
@@ -318,7 +286,8 @@ function moodInfo(){
  if(s<80) return {m:'지침',c:'#f0b030',d:'피곤이 쌓여 연습 효율이 떨어지고 있어요.',g:'휴식이나 가족과의 시간을 넣어 주세요.'};
  return {m:'위험',c:'#e84848',d:'한계에 가깝습니다. 연습 효과가 절반으로 줄어요.',g:'당장 쉬게 하지 않으면 쓰러질 수 있어요!'};
 }
-function drawChar(expr){if(isIdol()){$('#char').innerHTML=`<img class="meimg" src="${meImg(expr)}" alt="">`;$('#char').classList.add('idol')}else{$('#char').classList.remove('idol');$('#char').innerHTML=girl(playerLook({expr:expr||moodExpr()}))}}
+let ACT_OUT=null;
+function drawChar(expr,outfit){if(outfit!==undefined)ACT_OUT=outfit;else if(!$('#scene').classList.contains('acting'))ACT_OUT=null;$('#char').innerHTML=girl(playerLook({expr:expr||moodExpr(),outfit:ACT_OUT}))}
 function timelineHTML(){
  const total=(S.mi||0)+S.monthsLeft;let cells='';let next=null;
  for(let m=1;m<=total;m++){let ic='',tt='';
@@ -339,8 +308,7 @@ function render(){
  $('#hStage').textContent=STAGES[S.stage].name+(S.position?` · ${S.position}`:'');
  $('#hDate').textContent=`${S.year}년 ${S.month}월 · ${S.age}세`;
  $('#hMoney').textContent=`${S.money.toLocaleString()} G`;
- document.body.classList.toggle('debut',isIdol());
- if(!$('#scene').classList.contains('acting')){if(isIdol()){$('#bg').innerHTML=`<img class="ill kb" src="${IMG.room}" alt=""><div class="sparkle"></div>`;$('#char').innerHTML='';$('#char').classList.remove('idol')}else{$('#bg').innerHTML=roomSVG();drawChar()}}
+ if(!$('#scene').classList.contains('acting')){$('#bg').innerHTML=sceneBG('F');drawChar(undefined,null)}
  $('#dayTag').textContent=S.stage>=4?`데뷔 D+${S.day-(S.debutDay||S.day)+1}`:`연습생 D+${S.day}`;
  const mi=moodInfo(); $('#moodTag').innerHTML=`<b style="color:${mi.c}">●</b> ${mi.m}`;
  $('#placeTag').textContent='📍 '+(STAGES[S.stage].place||(agObj()?agObj().name:''));
@@ -436,9 +404,7 @@ async function runMonth(){
   await timeBanner(`${S.month}월 ${startDays[i]}일`,`${ORD[i]} 열흘 · ${a.name}`,1300);
   sc.classList.add('acting');setProps(a.prop);
   const bk=bldOf(a.id);
-  if(isIdol()&&(bk==='A'||bk==='B')&&S.stage<=5){$('#bg').innerHTML=`<img class="ill kb" src="${IMG.practice}" alt="">`;$('#char').innerHTML='';$('#char').className=''}
-  else if(isIdol()&&bk==='F'&&S.stage<=5){$('#bg').innerHTML=`<img class="ill kb" src="${IMG.room}" alt="">`;$('#char').innerHTML='';$('#char').className=''}
-  else{$('#bg').innerHTML=ACTBG[bk]();$('#char').className='a-'+a.anim;drawChar(a.anim==='rest'?'happy':'smile')}showTeam(a.team&&S.stage>=3,a.anim);
+  $('#bg').innerHTML=sceneBG(bk);$('#char').className='a-'+a.anim;drawChar(a.anim==='rest'?'happy':'smile',actOutfit(bk));showTeam(a.team&&S.stage>=3,a.anim);
   if(a.anim==='sing') addNotes();
   $('#actTag').style.display='block';
   const d0=S.day;
@@ -533,14 +499,14 @@ async function ddayIntro(n){
 }
 const SIG=[null,'t20','t21','t22','t23','t24','t25','t26'];
 async function evolve(n){
- const before=playerLook({expr:'normal',mic:false,crown:false});
+ const o0=meOutfit({...S.wear});const before=playerLook({expr:'normal',outfit:o0});
  const it=WARDROBE.top.find(i=>i.id===SIG[n]);
  if(it&&!S.owned.includes(it.id))S.owned.push(it.id);
  if(it)S.wear.top=it.id;
  const prevStage=S.stage;S.stage=n;
- const after=playerLook({expr:'happy',mic:false});
+ const cyc=['practice','daily','hoodie'];let o1=meOutfit(S.wear);if(o1===o0)o1=cyc[(cyc.indexOf(o0)+1)%3];const after=playerLook({expr:'happy',outfit:o1});
  S.stage=prevStage;
- await cutscene('evolve',{before,after,afterImg:n===4?ME.default:null,n,head:STAGES[n].name,item:it?it.name:'',cap:`✨ ${S.name}, 「${STAGES[n].name}」 단계로 성장! ✨${it?`\n🎁 기념 의상 [${it.name}] 획득! (비주얼 +${it.vis})`:''}`});
+ await cutscene('evolve',{before,after,n,head:STAGES[n].name,item:it?it.name:'',cap:`✨ ${S.name}, 「${STAGES[n].name}」 단계로 성장! ✨${it?`\n🎁 기념 의상 [${it.name}] 획득! (비주얼 +${it.vis})`:''}`});
 }
 async function passCut(head){await cutscene('pass',{head,cap:''})}
 async function giveBadge(i){if(!S.badges)S.badges=[];if(S.badges.some(b=>b.icon===BADGES[i][0]))return;S.badges.push({icon:BADGES[i][0],name:BADGES[i][1]});await cutscene('badge',{icon:BADGES[i][0],color:BADGES[i][2],head:`뱃지 획득! 「${BADGES[i][1]}」`,cap:`${S.badges.length} / 8 뱃지`})}
@@ -649,7 +615,7 @@ async function ending(id){
  if(S.aff.granny>=3) extra+='\n💗 언덕길 할머니는 오늘도 TV 앞에서 손뼉을 치신다.';
  e.g==='BAD'?SFX.miss():SFX.fan();
  $('#endCard').innerHTML=`<div class="grd">ENDING · ${e.g}</div><h1>${e.t}</h1>
-  <div class="endchar">${isIdol()?`<img src="${ME.default}" style="width:100%">`:girl(playerLook({expr:e.g==='BAD'?'sad':'happy'}))}</div>
+  <div class="endchar">${girl(playerLook({expr:e.g==='BAD'?'sad':'happy'}))}</div>
   <div style="font-size:13px;color:#7a5070;text-align:center">${S.name}${S.group?` · ${S.group}`:''}${S.position?` · ${S.position}`:''} · ${S.age}세</div>
   <p>${e.d}${extra}</p>
   <div class="chips" style="justify-content:center">${['vocal','dance','visual','mind','english','variety'].map(k=>`<span class="chip">${LBL[k]} ${statVal(k)}</span>`).join('')}${S.fame?`<span class="chip up">팬덤 ${S.fame}</span>`:''}</div>
